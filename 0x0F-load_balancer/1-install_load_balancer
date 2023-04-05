@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Script that Installs and configures haproxy with round robin algorithm
+
+# updates a new ubuntu system
+apt-get -y update
+apt-get -y upgrade
+
+
+# Installs Haproxy on my server
+apt-get -y install --no-install-recommends software-properties-common
+add-apt-repository ppa:vbernat/haproxy-2.6
+apt-get -y install haproxy=2.6.\*
+
+
+sed 'a\ENABLED=1' /etc/default/haproxy
+
+printf %s "/n
+        frontend http-in
+                bind *:80
+                mode http
+                default_backend serve
+
+        backend serve
+                balance roundrobin
+                server 58762-web-01 54.167.150.204:80 check
+                server 58762-web-02 54.167.89.185:80 check
+" >> /etc/haproxy/haproxy.cfg
+
+sudo service haproxy restart
